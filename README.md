@@ -1,3 +1,11 @@
 # nodejs-aws-be
 
-Frontend: [https://d21tkn9gbb6vp3.cloudfront.net/](https://d21tkn9gbb6vp3.cloudfront.net/)
+## Available Scripts
+
+### `npm start`
+
+Runs [serverless-offline](https://github.com/dherault/serverless-offline) on [http://localhost:8080/](http://localhost:8080/) <br />
+
+### `npm test`
+
+Launches the test runner.<br />

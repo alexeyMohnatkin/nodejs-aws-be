@@ -19,7 +19,11 @@ describe('Lambda getProductByID', () => {
 
     const expected = {
       statusCode: 200,
-      body: JSON.stringify(product)
+      body: JSON.stringify(product),
+      headers: {
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Origin": "*",
+      },
     };
 
     expect(result).toEqual(expected);
@@ -38,7 +42,7 @@ describe('Lambda getProductByID', () => {
 
     const expected = {
       statusCode: 404,
-      body: JSON.stringify({message: 'Product not found'})
+      body: JSON.stringify({message: 'Product not found'}),
     };
 
     expect(result).toEqual(expected);

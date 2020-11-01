@@ -1,19 +1,20 @@
 import getProducts from './getProducts';
 
-import * as products from './products.json';
+import products from './products.json';
 
 describe('Lambda getProducts', () => {
   it('should return products list', async () => {
-    const event = {
-      httpMethod: 'GET'
-    }
 
     // @ts-ignore
-    const result = await getProducts(event);
+    const result = await getProducts();
 
     const expected = {
       statusCode: 200,
-      body: JSON.stringify({ products })
+      body: JSON.stringify({ products }),
+      headers: {
+        "Access-Control-Allow-Credentials": true,
+        "Access-Control-Allow-Origin": "*",
+      },
     };
 
     expect(result).toEqual(expected);

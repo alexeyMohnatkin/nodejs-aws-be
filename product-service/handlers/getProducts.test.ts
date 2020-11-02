@@ -1,12 +1,14 @@
-import getProducts from './getProducts';
+import { createAPIGatewayEvent } from '../APIGatewayEventMock';
 
+import getProducts from './getProducts';
 import products from './products.json';
 
 describe('Lambda getProducts', () => {
   it('should return products list', async () => {
 
-    // @ts-ignore
-    const result = await getProducts();
+    const event = createAPIGatewayEvent();
+
+    const result = await getProducts(event, null, null);
 
     const expected = {
       statusCode: 200,

@@ -5,7 +5,7 @@
   "main": "handler.js",
   "scripts": {
     "start": "sls offline --httpPort 8080",
-    "test": "jest"
+    "test": "jest --watch --verbose"
   },
   "dependencies": {
     "jest": "^26.6.1",

@@ -1,4 +1,5 @@
 swagger: '2.0'
+host: https://hu3on2ee5i.execute-api.eu-west-1.amazonaws.com/dev
 info:
   description: nodejs-aws-be
   version: '1.0'

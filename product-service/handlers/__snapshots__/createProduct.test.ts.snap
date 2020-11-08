@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Lambda createProduct should create new product and return it in the response 1`] = `
+Array [
+  Array [
+    "BEGIN",
+  ],
+  Array [
+    "INSERT INTO products (title, description, image, price) VALUES
+        ('ProductOne', 'Short Product Description1', 'https://source.unsplash.com/random?sig=0', '2.4')
+        RETURNING id;
+      ",
+  ],
+  Array [
+    "INSERT INTO stocks (product_id, count) VALUES
+        ('7567ec4b-b10c-48c5-9345-fc73c48a80aa', 4);
+      ",
+  ],
+  Array [
+    "COMMIT",
+  ],
+  Array [
+    "SELECT * FROM products p LEFT JOIN stocks s ON s.product_id = p.id WHERE p.id='7567ec4b-b10c-48c5-9345-fc73c48a80aa'",
+  ],
+]
+`;
+
+exports[`Lambda createProduct should rollback transaction if product creation failed 1`] = `
+Array [
+  Array [
+    "BEGIN",
+  ],
+  Array [
+    "INSERT INTO products (title, description, image, price) VALUES
+        ('ProductOne', 'Short Product Description1', 'https://source.unsplash.com/random?sig=0', '2.4')
+        RETURNING id;
+      ",
+  ],
+  Array [
+    "ROLLBACK",
+  ],
+]
+`;
+
+exports[`Lambda createProduct should rollback transaction if stock creation failed 1`] = `
+Array [
+  Array [
+    "BEGIN",
+  ],
+  Array [
+    "INSERT INTO products (title, description, image, price) VALUES
+        ('ProductOne', 'Short Product Description1', 'https://source.unsplash.com/random?sig=0', '2.4')
+        RETURNING id;
+      ",
+  ],
+  Array [
+    "INSERT INTO stocks (product_id, count) VALUES
+        ('7567ec4b-b10c-48c5-9345-fc73c48a80aa', 4);
+      ",
+  ],
+  Array [
+    "ROLLBACK",
+  ],
+]
+`;

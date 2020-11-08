@@ -1,0 +1,59 @@
+swagger: '2.0'
+host: https://hu3on2ee5i.execute-api.eu-west-1.amazonaws.com/dev
+info:
+  description: nodejs-aws-be
+  version: '1.0'
+  title: nodejs-aws-be
+basePath: /
+tags:
+  - name: Product API
+paths:
+  /getProducts:
+    get:
+      tags:
+        - Product API
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Products'
+  /getProductById/{productId}:
+    get:
+      tags:
+        - Product API
+      parameters:
+        - in: path
+          name: productId
+          type: string
+          required: true
+          description: product ID
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Product'
+        '404':
+          description: Product not found.
+definitions:
+  Product:
+    type: object
+    properties:
+      count:
+        type: number
+      description:
+        type: string
+      id:
+        type: string
+      price:
+        type: number
+      title:
+        type: string
+    title: Product
+  Products:
+    type: object
+    properties:
+      products:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
+    title: Products

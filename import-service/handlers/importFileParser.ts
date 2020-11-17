@@ -29,21 +29,22 @@ const importFileParser: S3Handler = async (event) => {
 
         results.push(data)
       })
-      .on('end', () => {
+      .on('end', async () => {
         console.log(results);
         console.log('end');
+
+        await s3.copyObject({
+          Bucket: BUCKET_NAME,
+          CopySource: `${BUCKET_NAME}/${s3Object.key}`,
+          Key: s3Object.key.replace('uploaded', 'parsed'),
+        }).promise();
+
+        await s3.deleteObject({
+          Bucket: BUCKET_NAME,
+          Key: s3Object.key,
+        }).promise();
       });
 
-    await s3.copyObject({
-      Bucket: BUCKET_NAME,
-      CopySource: `${BUCKET_NAME}/${s3Object.key}`,
-      Key: s3Object.key.replace('uploaded', 'parsed'),
-    }).promise();
-
-    await s3.deleteObject({
-      Bucket: BUCKET_NAME,
-      Key: s3Object.key,
-    }).promise();
 
   } catch (error) {
     console.log('importFileParser error: \n');

@@ -3,16 +3,15 @@ import * as csv from 'csv-parser';
 import { S3Handler } from 'aws-lambda';
 import 'source-map-support/register';
 
-import { BUCKET_NAME } from '../constants';
-
-const importFileParser: S3Handler = async (event) => {
+const importFileParser: S3Handler = async (event, _context, callback) => {
   try {
     const s3 = new AWS.S3({
       region: 'eu-west-1'
     });
 
-    const record = event.Records[0];
+    const { BUCKET_NAME } = process.env;
 
+    const record = event.Records[0];
     const s3Object = record.s3.object;
 
     const s3Stream = s3.getObject({
@@ -20,36 +19,48 @@ const importFileParser: S3Handler = async (event) => {
       Key: s3Object.key,
     }).createReadStream();
 
-    const results = [];
+    const sqs = new AWS.SQS()
 
-    s3Stream
-      .pipe(csv({ separator: ';' }))
-      .on('data', (data) => {
-        console.log(data);
+    console.log('Start parsing...');
+    await new Promise((resolve) => {
+      s3Stream
+        .pipe(csv({ separator: ';' }))
+        .on('data', (item) => {
+          console.log('Item parsed: \n', item);
+          sqs.sendMessage({
+            QueueUrl: process.env.SQS_URL,
+            MessageBody: JSON.stringify(item),
+          }, (err, data) => {
+            if (err) {
+              console.error(err);
+              return;
+            }
+            console.log('importFileParser sent new record to the queue: \n', data);
+          })
+        })
+        .on('end', async () => {
+          console.log('Parsing complete');
 
-        results.push(data)
-      })
-      .on('end', async () => {
-        console.log(results);
-        console.log('end');
+          await s3.copyObject({
+            Bucket: BUCKET_NAME,
+            CopySource: `${BUCKET_NAME}/${s3Object.key}`,
+            Key: s3Object.key.replace('uploaded', 'parsed'),
+          }).promise();
 
-        await s3.copyObject({
-          Bucket: BUCKET_NAME,
-          CopySource: `${BUCKET_NAME}/${s3Object.key}`,
-          Key: s3Object.key.replace('uploaded', 'parsed'),
-        }).promise();
+          await s3.deleteObject({
+            Bucket: BUCKET_NAME,
+            Key: s3Object.key,
+          }).promise();
 
-        await s3.deleteObject({
-          Bucket: BUCKET_NAME,
-          Key: s3Object.key,
-        }).promise();
-      });
+          resolve();
+        })
+    })
 
+    callback(null);
 
   } catch (error) {
-    console.log('importFileParser error: \n');
-    console.log(error);
-
+    console.error('importFileParser error: \n', error);
+    callback(error);
   }
 }
 

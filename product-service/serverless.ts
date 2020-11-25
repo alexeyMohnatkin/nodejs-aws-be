@@ -28,8 +28,46 @@ const serverlessConfiguration: Serverless = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      SQS_URL: {
+        Ref: 'SQSQueue',
+      },
     },
     region: 'eu-west-1',
+    iamRoleStatements: [{
+      Effect: 'Allow',
+      Action: 'sqs:*',
+      Resource: {
+        'Fn::GetAtt': ['SQSQueue', 'Arn'],
+      },
+    }]
+  },
+  resources: {
+    Resources: {
+      SQSQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'catalogItemsQueue',
+        }
+      }
+    },
+    Outputs: {
+      CatalogItemsQueueUrl: {
+        Value: {
+          Ref: "SQSQueue",
+        },
+        Export: {
+          Name: "CatalogItemsQueueUrl",
+        },
+      },
+      CatalogItemsQueueArn: {
+        Value: {
+          'Fn::GetAtt': ['SQSQueue', 'Arn']
+        },
+        Export: {
+          Name: "CatalogItemsQueueArn",
+        },
+      },
+    },
   },
   functions: {
     getProducts: {
@@ -74,7 +112,18 @@ const serverlessConfiguration: Serverless = {
         },
       ],
     },
-  }
+    catalogBatchProcess: {
+      handler: 'handler.catalogBatchProcess',
+      events: [{
+        sqs: {
+          batchSize: 5,
+          arn: {
+            'Fn::GetAtt': ['SQSQueue', 'Arn'],
+          }
+        }
+      }],
+    },
+  },
 }
 
 module.exports = serverlessConfiguration;

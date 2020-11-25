@@ -2,8 +2,6 @@ import * as AWS from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
 
-import { BUCKET_NAME } from '../constants';
-
 const importProductsFile: APIGatewayProxyHandler = async (event) => {
   const s3 = new AWS.S3({
     region: 'eu-west-1',
@@ -24,13 +22,13 @@ const importProductsFile: APIGatewayProxyHandler = async (event) => {
 
     const signedUrl = await new Promise((resolve, reject) => {
       s3.getSignedUrl('putObject', {
-        Bucket: BUCKET_NAME,
+        Bucket: process.env.BUCKET_NAME,
         Key: `uploaded/${filename}`,
         Expires: 60,
         ContentType: 'text/csv',
       }, (error, url) => {
         if (error) {
-          console.log(error);
+          console.error('SignedUrl generation failed: \n', error);
           reject('SignedUrl generation failed');
         }
         resolve(url);
@@ -47,8 +45,7 @@ const importProductsFile: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error) {
-    console.log('importProductsFile error: \n');
-    console.log(error);
+    console.error('importProductsFile error: \n', error);
 
     return {
       statusCode: 500,

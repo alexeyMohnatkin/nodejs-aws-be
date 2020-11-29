@@ -19,11 +19,11 @@ const catalogBatchProcess: SQSHandler = async (event) => {
     console.log('Products were imported successfully');
 
     const sns = new AWS.SNS({ region: "eu-west-1" });
-    sns.publish({
+    await sns.publish({
       Subject: 'Products has been imported',
       Message: JSON.stringify((products)),
       TopicArn: process.env.SNS_ARN,
-    });
+    }).promise();
     console.log('SNS has sent the notification');
 
   } catch (error) {

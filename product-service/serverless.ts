@@ -28,8 +28,8 @@ const serverlessConfiguration: Serverless = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-      SQS_URL: {
-        Ref: 'SQSQueue',
+      SNS_ARN: {
+        Ref: 'SNSTopic',
       },
     },
     region: 'eu-west-1',
@@ -39,6 +39,12 @@ const serverlessConfiguration: Serverless = {
       Resource: {
         'Fn::GetAtt': ['SQSQueue', 'Arn'],
       },
+    }, {
+      Effect: 'Allow',
+      Action: 'sns:*',
+      Resource: {
+        Ref: 'SNSTopic',
+      },
     }]
   },
   resources: {
@@ -47,16 +53,32 @@ const serverlessConfiguration: Serverless = {
         Type: 'AWS::SQS::Queue',
         Properties: {
           QueueName: 'catalogItemsQueue',
-        }
-      }
+        },
+      },
+      SNSTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'snsImportNotify',
+        },
+      },
+      SNSSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Protocol: 'email',
+          Endpoint: 'dizzymohnatkin@gmail.com',
+          TopicArn: {
+            Ref: 'SNSTopic',
+          },
+        },
+      },
     },
     Outputs: {
       CatalogItemsQueueUrl: {
         Value: {
-          Ref: "SQSQueue",
+          Ref: 'SQSQueue',
         },
         Export: {
-          Name: "CatalogItemsQueueUrl",
+          Name: 'CatalogItemsQueueUrl',
         },
       },
       CatalogItemsQueueArn: {
@@ -64,7 +86,7 @@ const serverlessConfiguration: Serverless = {
           'Fn::GetAtt': ['SQSQueue', 'Arn']
         },
         Export: {
-          Name: "CatalogItemsQueueArn",
+          Name: 'CatalogItemsQueueArn',
         },
       },
     },

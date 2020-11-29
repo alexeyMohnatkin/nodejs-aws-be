@@ -100,6 +100,33 @@ const serverlessConfiguration: Serverless = {
           },
         },
       },
+
+      GatewayResponseAccessDeied: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi'
+          },
+          ResponseType: 'ACCESS_DENIED',
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+          },
+        },
+      },
+      GatewayResponseUnauthorized: {
+        Type: 'AWS::ApiGateway::GatewayResponse',
+        Properties: {
+          RestApiId: {
+            Ref: 'ApiGatewayRestApi'
+          },
+          ResponseType: 'UNAUTHORIZED',
+          ResponseParameters: {
+            'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+            'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+          },
+        },
+      },
     },
   },
   functions: {
@@ -112,7 +139,22 @@ const serverlessConfiguration: Serverless = {
           cors: {
             origins: '*',
           },
-        }
+          authorizer: {
+            name: 'basicAuthorizer',
+            arn: {
+              'Fn::Join': [
+                ':',
+                ['arn:aws:lambda',
+                { Ref: 'AWS::Region' },
+                { Ref: 'AWS::AccountId' },
+                'function:authorization-service-dev-basicAuthorizer',
+              ]],
+            } as any,
+            resultTtlInSeconds: 0,
+            identitySource: 'method.request.header.Authorization',
+            type: 'token',
+          },
+        },
       }],
     },
     importFileParser: {

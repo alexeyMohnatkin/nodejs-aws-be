@@ -9,4 +9,3 @@ Runs [serverless-offline](https://github.com/dherault/serverless-offline) on [ht
 ### `npm test`
 
 Launches the test runner.<br />
-
